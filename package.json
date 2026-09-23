@@ -1,0 +1,9 @@
+{
+  "name": "dominando-nodejs",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^5.2.1"
+  }
+}
