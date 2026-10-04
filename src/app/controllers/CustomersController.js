@@ -1,3 +1,5 @@
+import Customer from "../models/Customer";
+
 class CustomersController {
   constructor() {
     this.customers = [
@@ -7,8 +9,11 @@ class CustomersController {
     ];
   }
   // Listragem do customer
-  index(req, res) {
-    return res.json(this.customers);
+  async index(req, res) {
+    const data = await Customer.findAll({
+      limit: 100,
+    });
+    return res.json(data);
   }
 
   // Recupera um customer
