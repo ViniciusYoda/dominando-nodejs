@@ -3,6 +3,7 @@ import { Op } from "sequelize";
 import "./database";
 
 import Customers from "./app/models/Customer";
+import Contact from "./app/models/Contact";
 
 class Playground {
   static async play() {
@@ -17,6 +18,15 @@ class Playground {
     // console.log(JSON.stringify(customerPk, null, 2));
 
     const customers = await Customers.findAll({
+      include: [
+        {
+          model: Contact,
+          where: {
+            status: "ACTIVE",
+          },
+          required: false,
+        },
+      ],
       where: {
         [Op.or]: {
           status: {
@@ -30,6 +40,7 @@ class Playground {
           },
         },
       },
+      order: [["name", "DESC"], ["createdAt"]],
     });
 
     console.log(JSON.stringify(customers, null, 2));
