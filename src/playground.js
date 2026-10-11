@@ -67,9 +67,22 @@ class Playground {
 
     // console.log(JSON.stringify(customers, null, 2));
 
+    // const customer = await Customers.create({
+    //   name: "Superercado Zaza",
+    //   email: "contato1@zaza.com.br",
+    // });
+
+    // const customer = await Customers.findByPk(6);
+
+    // const newCustomer = customer.update({ status: "ACTIVE" });
+
+    // const customer = await Customers.findByPk(5);
+
+    // customer.destroy();
+
     const customer = await Customers.create({
-      name: "Superercado Zaza",
-      email: "contato1@zaza.com.br",
+      name: "Empresa 4",
+      email: "empresa4@email.com",
     });
 
     console.log(JSON.stringify(customer, null, 2));

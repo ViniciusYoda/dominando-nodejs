@@ -31,13 +31,20 @@ class Customer extends Model {
             };
           },
         },
+        hooks: {
+          beforeValidate: (customer) => {
+            customer.status = "ARCHIVED";
+          },
+        },
         sequelize,
       }
     );
   }
 
   static associate(models) {
-    this.hasMany(models.Contact);
+    this.hasMany(models.Contact, {
+      foreignKey: "customer_id",
+    });
   }
 }
 
