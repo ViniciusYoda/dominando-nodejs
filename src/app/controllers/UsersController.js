@@ -67,6 +67,10 @@ function userSchema(required) {
     for (const field of Object.keys(fields)) {
       fields[field] = fields[field].required(`${field} é obrigatório.`);
     }
+    fields.confirmPassword = Yup.string()
+      .strict()
+      .required("Confirme a senha em confirmPassword.")
+      .oneOf([Yup.ref("password")], "As senhas devem ser iguais.");
   } else {
     fields.oldPassword = Yup.string()
       .strict()
@@ -200,12 +204,13 @@ class UsersController {
 
   async create(req, res) {
     try {
-      const { password, ...data } = await userSchema(true).validate(
+      const { password, name, email } = await userSchema(true).validate(
         req.body ?? {},
         { abortEarly: false, stripUnknown: true }
       );
       const user = await User.create({
-        ...data,
+        name,
+        email,
         password_hash: await hashPassword(password),
       });
       return res.status(201).json(publicUser(user));
