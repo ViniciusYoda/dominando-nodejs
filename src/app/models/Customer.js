@@ -33,7 +33,9 @@ class Customer extends Model {
         },
         hooks: {
           beforeValidate: (customer) => {
-            customer.status = "ARCHIVED";
+            if (customer.isNewRecord) {
+              customer.status = "ARCHIVED";
+            }
           },
         },
         sequelize,
