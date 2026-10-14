@@ -5,10 +5,12 @@
   "license": "MIT",
   "dependencies": {
     "date-fns": "^4.4.0",
+    "dotenv": "^18.0.8",
     "express": "^5.2.1",
     "pg": "^8.23.1",
     "pg-hstore": "^2.3.4",
     "sequelize": "^6.37.8",
+    "youch": "2",
     "yup": "^1.7.1"
   },
   "devDependencies": {
