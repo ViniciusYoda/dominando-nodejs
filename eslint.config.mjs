@@ -14,7 +14,7 @@ export default defineConfig([
       "no-param-reassign": "off",
       camelcase: "off",
       "no-unused-vars": ["error", { argsIgnorePattern: "next" }],
-      "prettier/prettier": ["error", { endOfLine: "auto" }],
+      "prettier/prettier": "off",
     },
   },
 ]);

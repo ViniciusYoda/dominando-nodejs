@@ -33,7 +33,7 @@ class Customer extends Model {
         },
         hooks: {
           beforeValidate: (customer) => {
-            if (customer.isNewRecord) {
+            if (customer.isNewRecord && customer.status === undefined) {
               customer.status = "ARCHIVED";
             }
           },

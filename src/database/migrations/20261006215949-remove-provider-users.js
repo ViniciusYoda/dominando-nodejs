@@ -9,7 +9,7 @@ module.exports = {
   async down(queryInterface, Sequelize) {
     return await queryInterface.addColumn("users", "provider", {
       type: Sequelize.BOOLEAN,
-      default: false,
+      defaultValue: false,
       allowNull: false,
     });
   },

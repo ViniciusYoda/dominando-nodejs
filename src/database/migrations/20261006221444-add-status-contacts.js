@@ -14,7 +14,7 @@ module.exports = {
     return await queryInterface.sequelize.transaction(async (transaction) => {
       await queryInterface.removeColumn("contacts", "status", { transaction });
       await queryInterface.sequelize.query(
-        'DROP TYPE IF EXISTS "enum_contact_status";',
+        'DROP TYPE IF EXISTS "enum_contacts_status";',
         { transaction }
       );
     });

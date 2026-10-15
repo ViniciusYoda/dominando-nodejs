@@ -1,9 +1,17 @@
 import { Router } from "express";
+
+import SessionsController from "./app/controllers/SessionsController";
 import customers from "./app/controllers/CustomersController";
 import contacts from "./app/controllers/ContactsController";
 import users from "./app/controllers/UsersController";
+import authMiddleware from "./app/middlewares/auth";
 
 const routes = new Router();
+const sessions = new SessionsController();
+
+routes.post("/sessions", sessions.create.bind(sessions));
+routes.post("/users", users.create.bind(users));
+routes.use(authMiddleware);
 
 routes.get("/customers", customers.index.bind(customers));
 routes.get("/customers/:id", customers.show.bind(customers));
@@ -19,7 +27,6 @@ routes.delete("/contacts/:id", contacts.destroy.bind(contacts));
 
 routes.get("/users", users.index.bind(users));
 routes.get("/users/:id", users.show.bind(users));
-routes.post("/users", users.create.bind(users));
 routes.put("/users/:id", users.update.bind(users));
 routes.delete("/users/:id", users.destroy.bind(users));
 

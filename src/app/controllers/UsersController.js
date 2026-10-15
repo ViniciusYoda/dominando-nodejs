@@ -1,36 +1,13 @@
-import { randomBytes, scrypt, timingSafeEqual } from "node:crypto";
-import { promisify } from "node:util";
 import { isValid, parseISO } from "date-fns";
 import { Op, UniqueConstraintError, ValidationError } from "sequelize";
 import * as Yup from "yup";
 import User from "../models/User";
+import { hashPassword, checkPassword } from "../lib/password";
 
 const publicFields = ["id", "name", "email", "createdAt", "updatedAt"];
-const deriveKey = promisify(scrypt);
-
-async function hashPassword(password) {
-  const salt = randomBytes(16).toString("hex");
-  const hash = await deriveKey(password, salt, 64);
-  return `scrypt$${salt}$${hash.toString("hex")}`;
-}
-
 function publicUser(user) {
   const data = user.get({ plain: true });
   return Object.fromEntries(publicFields.map((field) => [field, data[field]]));
-}
-
-async function checkPassword(password, storedHash) {
-  if (typeof storedHash !== "string") return false;
-  const [algorithm, salt, hash, extra] = storedHash.split("$");
-  if (
-    algorithm !== "scrypt" ||
-    !/^[a-f0-9]{32}$/.test(salt) ||
-    !/^[a-f0-9]{128}$/.test(hash) ||
-    extra !== undefined
-  )
-    return false;
-  const candidate = await deriveKey(password, salt, 64);
-  return timingSafeEqual(candidate, Buffer.from(hash, "hex"));
 }
 
 function validId(value) {
@@ -225,6 +202,11 @@ class UsersController {
         .status(400)
         .json({ error: "id deve ser um inteiro positivo." });
     }
+    if (req.userId !== Number(req.params.id)) {
+      return res
+        .status(403)
+        .json({ error: "Você só pode alterar seu próprio usuário." });
+    }
     try {
       const { password, oldPassword, ...data } = await userSchema(
         false
@@ -250,6 +232,11 @@ class UsersController {
       return res
         .status(400)
         .json({ error: "id deve ser um inteiro positivo." });
+    }
+    if (req.userId !== Number(req.params.id)) {
+      return res
+        .status(403)
+        .json({ error: "Você só pode excluir seu próprio usuário." });
     }
     const user = await User.findByPk(Number(req.params.id));
     if (!user)
