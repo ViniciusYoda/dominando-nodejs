@@ -1,8 +1,18 @@
 import User from "../models/User";
 import jwt from "jsonwebtoken"
 
+import authConfig from "../../config/auth"
+import * as Yup from "yup";
+
 class SessionsController {
   async create(req, res) {
+    const schema = Yup.object({
+      email: Yup.string().strict().email().required(),
+      password: Yup.string().strict().required().max(128),
+    });
+    if (!(await schema.isValid(req.body ?? {}))) {
+      return res.status(400).json({ error: "Informe email e senha válidos." });
+    }
     const { email, password } = req.body;
 
     const user = await User.findOne({
@@ -10,11 +20,11 @@ class SessionsController {
     });
 
     if (!user) {
-      return res.status(401).json({ error: "User not found" });
+      return res.status(401).json({ error: "Email ou senha incorretos." });
     }
 
     if (!(await user.checkPassword(password))) {
-      return res.status(401).json({ error: "Password not match" });
+      return res.status(401).json({ error: "Email ou senha incorretos." });
     }
 
     const { id, name } = user;
@@ -23,8 +33,8 @@ class SessionsController {
         user: {
             id, name, email
         },
-        token: jwt.sign({ id }, "a06d39d9gwejgnwogvwr2452", {
-            expiresIn: "7d"
+        token: jwt.sign({ id }, authConfig.secret, {
+            expiresIn: authConfig.expiresIn
         }),
     })
 

@@ -162,6 +162,8 @@ class UsersController {
       limit,
       offset: (page - 1) * limit,
     });
+
+    User.findByPk(req.userId)
     return res.json(users.map(publicUser));
   }
 
