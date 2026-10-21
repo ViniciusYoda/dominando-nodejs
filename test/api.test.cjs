@@ -13,6 +13,10 @@ test("API: login, protecao, bcrypt e upload sem banco real", async (t) => {
   const File = require("../src/app/models/File").default;
   const auth = require("../src/config/auth").default;
   const { hashPassword, checkPassword } = require("../src/app/lib/password");
+  const Mail = require("../src/lib/Mail").default;
+  const originalSend = Mail.send;
+  const emails = [];
+  Mail.send = async (message) => { emails.push(message); return { messageId: "test" }; };
   const original = { findOne: User.findOne, findByPk: User.findByPk, create: User.create, fileCreate: File.create };
   const user = User.build({ id: 1, name: "Ana", email: "ana@example.com", password_hash: await hashPassword("password123") }, { isNewRecord: false });
   let updated;
@@ -29,6 +33,7 @@ test("API: login, protecao, bcrypt e upload sem banco real", async (t) => {
     await new Promise((done) => server.close(done));
     Object.assign(User, { findOne: original.findOne, findByPk: original.findByPk, create: original.create });
     File.create = original.fileCreate;
+    Mail.send = originalSend;
     if (uploaded) await unlink(resolve(__dirname, "../tmp/uploads", uploaded.path)).catch(() => {});
   });
   const base = `http://127.0.0.1:${server.address().port}`;
@@ -49,11 +54,34 @@ test("API: login, protecao, bcrypt e upload sem banco real", async (t) => {
   await t.test("cadastro publico exige confirmacao e nao expoe hash", async () => {
     const body = { name: "Ana", email: "ana@example.com", password: "password123" };
     assert.equal((await request("/users", "POST", body)).status, 400);
+    assert.equal(emails.length, 0);
     const response = await request("/users", "POST", { ...body, confirmPassword: body.password });
     assert.equal(response.status, 201);
     const data = await response.json();
     assert.equal(data.password_hash, undefined);
     assert.equal(data.password, undefined);
+    assert.equal(emails.length, 1);
+    assert.equal(emails[0].to.address, body.email);
+    assert.equal(emails[0].to.name, body.name);
+    assert.ok(emails[0].text.includes(body.name));
+    assert.equal(JSON.stringify(emails[0]).includes(body.password), false);
+  });
+
+  await t.test("falha no SMTP preserva cadastro e informa aviso", async () => {
+    const send = Mail.send;
+    const log = console.error;
+    Mail.send = async () => { throw new Error("SMTP unavailable"); };
+    console.error = () => {};
+    try {
+      const response = await request("/users", "POST", {
+        name: "Ana", email: "ana@example.com", password: "password123", confirmPassword: "password123",
+      });
+      assert.equal(response.status, 201);
+      assert.ok((await response.json()).warning);
+    } finally {
+      Mail.send = send;
+      console.error = log;
+    }
   });
 
   let token;

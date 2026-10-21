@@ -3,6 +3,7 @@ import { Op, UniqueConstraintError, ValidationError } from "sequelize";
 import * as Yup from "yup";
 import User from "../models/User";
 import { hashPassword, checkPassword } from "../lib/password";
+import Mail from "../../lib/Mail";
 
 const publicFields = ["id", "name", "email", "createdAt", "updatedAt"];
 function publicUser(user) {
@@ -192,6 +193,19 @@ class UsersController {
         email,
         password_hash: await hashPassword(password),
       });
+      try {
+        await Mail.send({
+          to: { name: user.name, address: user.email },
+          subject: "Bem-vindo ao Dominando Node.js!",
+          text: `Olá, ${user.name}!\n\nSeu cadastro foi realizado com sucesso.\n\nBem-vindo ao Dominando Node.js!`,
+        });
+      } catch {
+        console.error("Não foi possível enviar o email de boas-vindas.");
+        return res.status(201).json({
+          ...publicUser(user),
+          warning: "Cadastro realizado, mas não foi possível enviar o email de boas-vindas.",
+        });
+      }
       return res.status(201).json(publicUser(user));
     } catch (error) {
       return handleError(error, res);
