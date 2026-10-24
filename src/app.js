@@ -1,7 +1,9 @@
-import "dotenv/config";
+import "./config/app";
 
 import express from "express";
-import Youch from "youch";
+import errorHandler from "./app/middlewares/errorHandler";
+import { NotFoundError } from "./app/errors";
+import requestLogger from "./app/middlewares/requestLogger";
 
 //import authMiddleware from "./app/middlewares/auth"
 import routes from "./routes";
@@ -17,6 +19,7 @@ class App {
   }
 
   middlewares() {
+    this.server.use(requestLogger);
     this.server.use(express.json());
     this.server.use(express.urlencoded({ extended: false }));
     //this.server.use(authMiddleware);
@@ -27,18 +30,10 @@ class App {
   }
 
   exceptionHandler() {
-    this.server.use(async (err, req, res, next) => {
-      if (res.headersSent) return next(err);
-      const status = err.status >= 400 && err.status < 600 ? err.status : 500;
-      if ((process.env.NODE_ENV || process.env.MODE_ENV) === "development") {
-        const errors = await new Youch(err, req).toJSON();
-        return res.status(status).json(errors);
-      }
-      return res.status(status).json({
-        error:
-          status === 500 ? "Erro interno do servidor." : "Requisição inválida.",
-      });
+    this.server.use(() => {
+      throw new NotFoundError("Rota nao encontrada.");
     });
+    this.server.use(errorHandler);
   }
 }
 

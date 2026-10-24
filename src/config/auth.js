@@ -1,4 +1,4 @@
-import "dotenv/config";
+import "./env";
 
 if (!process.env.AUTH_SECRET) {
     throw new Error("Configure AUTH_SECRET no .env.");
@@ -6,5 +6,5 @@ if (!process.env.AUTH_SECRET) {
 
 export default {
     secret: process.env.AUTH_SECRET,
-    expiresIn: "7d"
+    expiresIn: process.env.AUTH_EXPIRES_IN || "7d"
 }

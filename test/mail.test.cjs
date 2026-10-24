@@ -41,7 +41,7 @@ test("Mail configura SMTP e encaminha mensagens sem envio real", async (t) => {
   assert.equal(received, message);
   await assert.rejects(mail.send({ subject: "Sem destinatário" }), /destinatário/);
   failure = new Error("SMTP unavailable");
-  await assert.rejects(mail.send(message), /SMTP unavailable/);
+  await assert.rejects(mail.send(message), (error) => error.code === "MAIL_DELIVERY_FAILED" && error.cause === failure);
   config.host = undefined;
   await assert.rejects(mail.send(message), /MAIL_HOST/);
 });

@@ -8,6 +8,7 @@ import contacts from "./app/controllers/ContactsController";
 import users from "./app/controllers/UsersController";
 import files from "./app/controllers/FilesController";
 import auth from "./app/middlewares/auth";
+import bulkEmails from "./app/controllers/BulkEmailsController";
 
 const routes = new Router();
 const upload = multer(multerConfig)
@@ -16,6 +17,7 @@ const sessions = new SessionsController();
 routes.post("/sessions", sessions.create.bind(sessions));
 routes.post("/users", users.create.bind(users));
 routes.use(auth);
+routes.post("/emails/bulk", bulkEmails.create.bind(bulkEmails));
 
 
 routes.get("/customers", customers.index.bind(customers));

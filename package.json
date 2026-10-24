@@ -4,7 +4,9 @@
   "main": "index.js",
   "license": "MIT",
   "dependencies": {
+    "@sentry/node": "^11.9.0",
     "bcrypt": "^6.0.0",
+    "bee-queue": "^2.0.0",
     "date-fns": "^4.4.0",
     "dotenv": "^18.0.8",
     "express": "^5.2.1",
@@ -32,6 +34,8 @@
     "lint": "eslint .",
     "test": "node --test test/*.test.cjs",
     "dev": "nodemon ./src/server.js",
+    "queue": "sucrase-node ./src/queue.js",
+    "queue:dev": "nodemon ./src/queue.js",
     "playground": "nodemon ./src/playground.js"
   }
 }
